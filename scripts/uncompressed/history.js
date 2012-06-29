@@ -1888,7 +1888,7 @@
 				sessionStorage.setItem('History.store',JSON.stringify(currentStore));
 			};
 
-			if(typeof(window.onbeforeunload) !== 'undefined') || typeof(window.onunload) !== 'undefined') {
+			if(typeof(window.onbeforeunload) !== 'undefined' || typeof(window.onunload) !== 'undefined') {
 			  History.Adapter.bind(window,'beforeunload',History.onUnload);
   			History.Adapter.bind(window,'unload',History.onUnload);
 			} else {

@@ -258,6 +258,7 @@
 				(typeof History.isInternetExplorer.cached !== 'undefined')
 					?	History.isInternetExplorer.cached
 					:	Boolean(History.getInternetExplorerMajorVersion())
+						&&!Boolean(navigator.userAgent.match(/(chromeframe)[\s\/]([\d.]+)/))
 				;
 			return result;
 		};

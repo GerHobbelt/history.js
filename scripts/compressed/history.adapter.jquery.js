@@ -1,1 +1,5 @@
-(function(a,b){"use strict";var c=a.History=a.History||{},d=a.jQuery;if(typeof c.Adapter!="undefined")throw new Error("History.js Adapter has already been loaded...");c.Adapter={bind:function(a,b,c){d(a).bind(b,c)},trigger:function(a,b,c){d(a).trigger(b,c)},extractEventData:function(a,c,d){var e=c&&c.originalEvent&&c.originalEvent[a]||d&&d[a]||b;return e},onDomLoad:function(a){d(a)}},typeof c.init!="undefined"&&c.init()})(window)
+/*
+ 2010-2011 Benjamin Arthur Lupton <contact@balupton.com>
+ @license New BSD License <http://creativecommons.org/licenses/BSD/>
+*/
+(function(e,g){var d=e.History=e.History||{},f=e.jQuery;if("undefined"!==typeof d.Adapter)throw Error("History.js Adapter has already been loaded...");d.Adapter={bind:function(a,b,c){f(a).bind(b,c)},trigger:function(a,b,c){f(a).trigger(b,c)},extractEventData:function(a,b,c){return b&&b.originalEvent&&b.originalEvent[a]||c&&c[a]||g},onDomLoad:function(a){f(a)}};"undefined"!==typeof d.init&&d.init()})(window);

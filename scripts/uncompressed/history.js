@@ -1884,8 +1884,31 @@
 				History.store = currentStore;
 				History.normalizeStore();
 
-				// Store
-				sessionStorage.setItem('History.store',JSON.stringify(currentStore));
+				// In Safari, going into Private Browsing mode causes the
+				// Session Storage object to still exist but if you try and use
+				// or set any property/function of it it throws the exception
+				// "QUOTA_EXCEEDED_ERR: DOM Exception 22: An attempt was made to
+				// add something to storage that exceeded the quota." infinitely
+				// every second.
+				var currentStoreString = JSON.stringify(currentStore);
+				try {
+					// Store
+					sessionStorage.setItem('History.store', currentStoreString);
+				}
+				catch (e) {
+					if (typeof DOMException !== 'undefined' && e.code === DOMException.QUOTA_EXCEEDED_ERR) {
+						if (sessionStorage.length) {
+							// Workaround for a bug seen on iPads. Sometimes the quota exceeded error comes up and simply
+							// removing/resetting the storage can work.
+							sessionStorage.removeItem('History.store');
+							sessionStorage.setItem('History.store', currentStoreString);
+						} else {
+							// Otherwise, we're probably private browsing in Safari, so we'll ignore the exception.
+						}
+					} else {
+						throw e;
+					}
+				}
 			};
 
 			// For Internet Explorer

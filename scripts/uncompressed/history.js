@@ -1993,14 +1993,14 @@
 				}
 			};
 
-			// For Internet Explorer
-			History.intervalList.push(setInterval(History.onUnload,History.options.storeInterval));
-
-			// For Other Browsers
-			History.Adapter.bind(window,'beforeunload',History.onUnload);
-			History.Adapter.bind(window,'unload',History.onUnload);
-
-			// Both are enabled for consistency
+			if (typeof(window.onbeforeunload) !== 'undefined' || typeof(window.onunload) !== 'undefined') {
+    			// For Other Browsers
+			    History.Adapter.bind(window,'beforeunload', History.onUnload);
+  			    History.Adapter.bind(window,'unload', History.onUnload);
+			} else {
+			    // For Internet Explorer
+			    History.intervalList.push(setInterval(History.onUnload, History.options.storeInterval));
+			}
 		}
 
 		// Non-Native pushState Implementation

@@ -1885,7 +1885,8 @@
 				History.normalizeStore();
 
 				// Store
-				sessionStorage.setItem('History.store',JSON.stringify(currentStore));
+				sessionStorage.removeItem('History.store');
+				sessionStorage.setItem('History.store','{}');
 			};
 
 			// For Internet Explorer

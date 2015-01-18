@@ -3,3 +3,8 @@
 /.idea
 *~
 *.bak
+
+# analyze_github script cache:
+__forks.info__/
+__forks__.bulk_dump
+

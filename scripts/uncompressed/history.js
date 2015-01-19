@@ -1164,9 +1164,6 @@
 				hash;
 			hash = History.getHashByUrl(url);
 			return hash;
-		};
-
-		/**
 		 * History.unescapeHash()
 		 * normalize and Unescape a Hash
 		 * @param {String} hash
@@ -1177,7 +1174,7 @@
 			var result = History.normalizeHash(hash);
 
 			// Unescape hash
-			result = decodeURIComponent(result);
+			result = window.decodeURIComponent(result);
 
 			// Return result
 			return result;

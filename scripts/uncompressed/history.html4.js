@@ -425,6 +425,11 @@
 			History.onHashChange = function(event){
 				//History.debug('History.onHashChange', arguments);
 
+				if (History.initialHashChange) {
+					History.savedStates = [];
+					History.initialHashChange = false;
+				}
+
 				// Prepare
 				var currentUrl = ((event && event.newURL) || History.getLocationHref()),
 					currentHash = History.getHashByUrl(currentUrl),
@@ -669,6 +674,7 @@
 			 */
 			if ( History.getHash() && !History.emulated.hashChange ) {
 				History.Adapter.onDomLoad(function(){
+					History.initialHashChange = true;
 					History.Adapter.trigger(window,'hashchange');
 				});
 			}

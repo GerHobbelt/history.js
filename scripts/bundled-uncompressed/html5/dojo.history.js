@@ -1,4 +1,125 @@
 /**
+ * History.js Dojo Adapter
+ *
+ * Essentially the same as the native adapter but uses dojo/ready for the dom load callback.
+ *
+ * @author Benjamin Arthur Lupton <contact@balupton.com>
+ * @copyright 2010-2011 Benjamin Arthur Lupton <contact@balupton.com>
+ * @license New BSD License <http://creativecommons.org/licenses/BSD/>
+ */
+
+// Closure
+(function(window,undefined){
+	"use strict";
+
+	// Localise Globals
+	var History = window.History = window.History||{},
+        require = window.require;
+
+	// Check Existence
+	if ( typeof History.Adapter !== 'undefined' ) {
+		throw new Error('History.js Adapter has already been loaded...');
+	}
+
+	// Add the Adapter
+	History.Adapter = {
+		/**
+		 * History.Adapter.handlers[uid][eventName] = Array
+		 */
+		handlers: {},
+
+		/**
+		 * History.Adapter._uid
+		 * The current element unique identifier
+		 */
+		_uid: 1,
+
+		/**
+		 * History.Adapter.uid(element)
+		 * @param {Element} element
+		 * @return {String} uid
+		 */
+		uid: function(element){
+			return element._uid || (element._uid = History.Adapter._uid++);
+		},
+
+		/**
+		 * History.Adapter.bind(el,event,callback)
+		 * @param {Element} element
+		 * @param {String} eventName - custom and standard events
+		 * @param {Function} callback
+		 * @return
+		 */
+		bind: function(element,eventName,callback){
+			// Prepare
+			var uid = History.Adapter.uid(element);
+
+			// Apply Listener
+			History.Adapter.handlers[uid] = History.Adapter.handlers[uid] || {};
+			History.Adapter.handlers[uid][eventName] = History.Adapter.handlers[uid][eventName] || [];
+			History.Adapter.handlers[uid][eventName].push(callback);
+
+			// Bind Global Listener
+			element['on'+eventName] = (function(element,eventName){
+				return function(event){
+					History.Adapter.trigger(element,eventName,event);
+				};
+			})(element,eventName);
+		},
+
+		/**
+		 * History.Adapter.trigger(el,event)
+		 * @param {Element} element
+		 * @param {String} eventName - custom and standard events
+		 * @param {Object} event - a object of event data
+		 * @return
+		 */
+		trigger: function(element,eventName,event){
+			// Prepare
+			event = event || {};
+			var uid = History.Adapter.uid(element),
+				i,n;
+
+			// Apply Listener
+			History.Adapter.handlers[uid] = History.Adapter.handlers[uid] || {};
+			History.Adapter.handlers[uid][eventName] = History.Adapter.handlers[uid][eventName] || [];
+
+			// Fire Listeners
+			for ( i=0,n=History.Adapter.handlers[uid][eventName].length; i<n; ++i ) {
+				History.Adapter.handlers[uid][eventName][i].apply(this,[event]);
+			}
+		},
+
+		/**
+		 * History.Adapter.extractEventData(key,event,extra)
+		 * @param {String} key - key for the event data to extract
+		 * @param {String} event - custom and standard events
+		 * @return {mixed}
+		 */
+		extractEventData: function(key,event){
+			var result = (event && event[key]) || undefined;
+			return result;
+		},
+
+		/**
+		 * History.Adapter.onDomLoad(callback)
+		 * @param {Function} callback
+		 * @return
+		 */
+		onDomLoad: function(callback) {
+			require(["dojo/ready"], function(ready) {
+				ready(callback);
+			});
+		}
+	};
+
+	// Try to Initialise History
+	if ( typeof History.init !== 'undefined' ) {
+		History.init();
+	}
+
+})(window);
+/**
  * History.js Core
  * @author Benjamin Arthur Lupton <contact@balupton.com>
  * @copyright 2010-2011 Benjamin Arthur Lupton <contact@balupton.com>
@@ -194,24 +315,17 @@
 		History.log = function(){
 			// Prepare
 			var
-                debugExists = !(typeof debug === 'undefined' || typeof debug.log === 'undefined' || typeof debug.log.apply === 'undefined'),
 				consoleExists = !(typeof console === 'undefined' || typeof console.log === 'undefined' || typeof console.log.apply === 'undefined'),
 				textarea = document.getElementById('log'),
 				message,
 				i,n,
 				args,arg
 				;
-            
-            args = Array.prototype.slice.call(arguments);
-			message = args.shift();
-
-	        //Write to Debug( https://github.com/cowboy/javascript-debug) if available
-	        if (debugExists ) {
-			    debug.debug(message,args);
-			}
 
 			// Write to Console
-			if ( consoleExists && !debugExists ) { //let's not write to both the console and debug.log
+			if ( consoleExists ) {
+				args = Array.prototype.slice.call(arguments);
+				message = args.shift();
 				if ( typeof console.debug !== 'undefined' ) {
 					console.debug.apply(console,[message,args]);
 				}
@@ -243,7 +357,7 @@
 				textarea.scrollTop = textarea.scrollHeight - textarea.clientHeight;
 			}
 			// No Textarea, No Console
-			else if ( !consoleExists && !debugExists ) {
+			else if ( !consoleExists ) {
 				alert(message);
 			}
 
@@ -291,7 +405,6 @@
 				(typeof History.isInternetExplorer.cached !== 'undefined')
 					?	History.isInternetExplorer.cached
 					:	Boolean(History.getInternetExplorerMajorVersion())
-						&&!Boolean(navigator.userAgent.match(/(chromeframe)[\s\/]([\d.]+)/))
 				;
 			return result;
 		};
@@ -1964,17 +2077,7 @@
 					}
 					currentStore.stateToId[item] = History.stateToId[item];
 				}
-                
-                // if you don't want to 'leak' history memory when leaving the page then run this code instead:
-                if (0) {
-    				// Update
-					currentStore = {
-                        idToState: {},
-                        urlToId: {},
-                        stateToId: {}
-                    };
-                }
-                
+
 				// Update
 				History.store = currentStore;
 				History.normalizeStore();
@@ -1989,7 +2092,8 @@
 				try {
 					// Store
 					sessionStorage.setItem('History.store', currentStoreString);
-				} catch (e) {
+				}
+				catch (e) {
 					if (e.code === DOMException.QUOTA_EXCEEDED_ERR) {
 						if (sessionStorage.length) {
 							// Workaround for a bug seen on iPads. Sometimes the quota exceeded error comes up and simply
@@ -2005,14 +2109,14 @@
 				}
 			};
 
-			if (typeof(window.onbeforeunload) !== 'undefined' || typeof(window.onunload) !== 'undefined') {
-    			// For Other Browsers
-			    History.Adapter.bind(window,'beforeunload', History.onUnload);
-  			    History.Adapter.bind(window,'unload', History.onUnload);
-			} else {
-			    // For Internet Explorer
-			    History.intervalList.push(setInterval(History.onUnload, History.options.storeInterval));
-			}
+			// For Internet Explorer
+			History.intervalList.push(setInterval(History.onUnload,History.options.storeInterval));
+
+			// For Other Browsers
+			History.Adapter.bind(window,'beforeunload',History.onUnload);
+			History.Adapter.bind(window,'unload',History.onUnload);
+
+			// Both are enabled for consistency
 		}
 
 		// Non-Native pushState Implementation

@@ -27,7 +27,7 @@
 		history = window.history; // Old History Object
 
 	try {
-		sessionStorage = window.sessionStorage; // This will throw an exception in some browsers when cookies/localStorage are explicitly disabled (i.e. Chrome)
+		sessionStorage = window.sessionStorage; // This will throw an exception (SecurityError) in some browsers when cookies/localStorage are explicitly disabled (i.e. Chrome)
 		sessionStorage.setItem('TEST', '1');
 		sessionStorage.removeItem('TEST');
 	} catch(e) {

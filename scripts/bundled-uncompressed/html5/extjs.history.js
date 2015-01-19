@@ -118,10 +118,11 @@
 		history = window.history; // Old History Object
 
 	try {
-		sessionStorage = window.sessionStorage; // This will throw an exception in some browsers when cookies/localStorage are explicitly disabled (i.e. Chrome)
+		sessionStorage = window.sessionStorage; // This will throw an exception (SecurityError) in some browsers when cookies/localStorage are explicitly disabled (i.e. Chrome)
 		sessionStorage.setItem('TEST', '1');
 		sessionStorage.removeItem('TEST');
 	} catch(e) {
+		// e.g.: cookie disabled mobile safari, iOS 7 users get here
 		sessionStorage = false;
 	}
 
@@ -285,17 +286,24 @@
 		History.log = function(){
 			// Prepare
 			var
+                debugExists = !(typeof debug === 'undefined' || typeof debug.log === 'undefined' || typeof debug.log.apply === 'undefined'),
 				consoleExists = !(typeof console === 'undefined' || typeof console.log === 'undefined' || typeof console.log.apply === 'undefined'),
 				textarea = document.getElementById('log'),
 				message,
 				i,n,
 				args,arg
 				;
+            
+            args = Array.prototype.slice.call(arguments);
+			message = args.shift();
+
+	        //Write to Debug( https://github.com/cowboy/javascript-debug) if available
+	        if (debugExists ) {
+			    debug.debug(message,args);
+			}
 
 			// Write to Console
-			if ( consoleExists ) {
-				args = Array.prototype.slice.call(arguments);
-				message = args.shift();
+			if ( consoleExists && !debugExists ) { //let's not write to both the console and debug.log
 				if ( typeof console.debug !== 'undefined' ) {
 					console.debug.apply(console,[message,args]);
 				}
@@ -327,7 +335,7 @@
 				textarea.scrollTop = textarea.scrollHeight - textarea.clientHeight;
 			}
 			// No Textarea, No Console
-			else if ( !consoleExists ) {
+			else if ( !consoleExists && !debugExists ) {
 				alert(message);
 			}
 
@@ -375,6 +383,7 @@
 				(typeof History.isInternetExplorer.cached !== 'undefined')
 					?	History.isInternetExplorer.cached
 					:	Boolean(History.getInternetExplorerMajorVersion())
+						&&!Boolean(navigator.userAgent.match(/(chromeframe)[\s\/]([\d.]+)/))
 				;
 			return result;
 		};
@@ -588,6 +597,9 @@
 			// Check
 			if ( /[a-z]+\:\/\//.test(url) ) {
 				// Full URL
+			}
+			else if ( url.substring(0,2) === '//' ) {
+				// Full URL (protocol-less)
 			}
 			else if ( firstChar === '/' ) {
 				// Root URL
@@ -836,7 +848,7 @@
 			newState = {};
 			newState.normalized = true;
 			newState.title = oldState.title||'';
-			newState.url = History.getFullUrl(oldState.url?oldState.url:(History.getLocationHref()));
+			newState.url = History.getFullUrl(oldState.url != null ? oldState.url : History.getLocationHref());
 			newState.hash = History.getShortUrl(newState.url);
 			newState.data = History.cloneObject(oldState.data);
 
@@ -2047,7 +2059,17 @@
 					}
 					currentStore.stateToId[item] = History.stateToId[item];
 				}
-
+                
+                // if you don't want to 'leak' history memory when leaving the page then run this code instead:
+                if (0) {
+    				// Update
+					currentStore = {
+                        idToState: {},
+                        urlToId: {},
+                        stateToId: {}
+                    };
+                }
+                
 				// Update
 				History.store = currentStore;
 				History.normalizeStore();
@@ -2062,8 +2084,7 @@
 				try {
 					// Store
 					sessionStorage.setItem('History.store', currentStoreString);
-				}
-				catch (e) {
+				} catch (e) {
 					if (e.code === DOMException.QUOTA_EXCEEDED_ERR) {
 						if (sessionStorage.length) {
 							// Workaround for a bug seen on iPads. Sometimes the quota exceeded error comes up and simply
@@ -2079,14 +2100,14 @@
 				}
 			};
 
-			// For Internet Explorer
-			History.intervalList.push(setInterval(History.onUnload,History.options.storeInterval));
-
-			// For Other Browsers
-			History.Adapter.bind(window,'beforeunload',History.onUnload);
-			History.Adapter.bind(window,'unload',History.onUnload);
-
-			// Both are enabled for consistency
+			if (typeof(window.onbeforeunload) !== 'undefined' || typeof(window.onunload) !== 'undefined') {
+    			// For Other Browsers
+			    History.Adapter.bind(window,'beforeunload', History.onUnload);
+  			    History.Adapter.bind(window,'unload', History.onUnload);
+			} else {
+			    // For Internet Explorer
+			    History.intervalList.push(setInterval(History.onUnload, History.options.storeInterval));
+			}
 		}
 
 		// Non-Native pushState Implementation

@@ -168,6 +168,18 @@ If you are using Rails, then the easiest way for you to try History.js would be 
 > Note: If you want to only support HTML5 Browsers and not HTML4 Browsers (so no hash fallback support) then just change the `/html4+html5/` part in the urls to just `/html5/`. See [Why supporting HTML4 browsers could be either good or bad based on my app's use cases](https://github.com/browserstate/history.js/wiki/Intelligent-State-Handling)
 
 
+## Build From Source
+
+You may regenerate the install bundles by running these `NPM` script commands:
+
+``` bash
+npm run build-uncompressed
+npm run build
+```
+
+which will regenerate all files in `scripts/bundled...`.
+
+
 ## Get Updates
 
 - For Commit RSS/Atom Updates:

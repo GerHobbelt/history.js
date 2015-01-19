@@ -1994,7 +1994,7 @@
 					// Store
 					sessionStorage.setItem('History.store', currentStoreString);
 				} catch (e) {
-					if (e.code === DOMException.QUOTA_EXCEEDED_ERR) {
+					if (typeof DOMException !== 'undefined' && e.code === DOMException.QUOTA_EXCEEDED_ERR) {
 						if (sessionStorage.length) {
 							// Workaround for a bug seen on iPads. Sometimes the quota exceeded error comes up and simply
 							// removing/resetting the storage can work.

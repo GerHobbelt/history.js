@@ -1790,7 +1790,7 @@
 
 				// Check the State
 				if ( History.getHashByUrl(url) && History.emulated.pushState ) {
-					throw new Error('History.js does not support states with fragement-identifiers (hashes/anchors).');
+					throw new Error('History.js does not support states with fragment-identifiers (hashes/anchors).');
 				}
 
 				// Handle Queueing
@@ -1847,7 +1847,7 @@
 
 				// Check the State
 				if ( History.getHashByUrl(url) && History.emulated.pushState ) {
-					throw new Error('History.js does not support states with fragement-identifiers (hashes/anchors).');
+					throw new Error('History.js does not support states with fragment-identifiers (hashes/anchors).');
 				}
 
 				// Handle Queueing

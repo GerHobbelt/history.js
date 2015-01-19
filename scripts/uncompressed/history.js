@@ -140,10 +140,10 @@
 		History.options.initialTitle = History.options.initialTitle || document.title;
 		
 		/**
-         * History.options.transformHash
-         * If true will transform the HTML4 hash to HTML5 equivalence. Set to false if you want the hash to be just a plain string, no meaning whatsoever.
-         */
-        History.options.transformHash = History.options.transformHash || true;
+		 * History.options.transformHash
+		 * If true will transform the HTML4 hash to HTML5 equivalence. Set to false if you want the hash to be just a plain string, no meaning whatsoever.
+		 */
+		History.options.transformHash = History.options.transformHash || true;
 
 		/**
 		 * History.options.html4Mode
@@ -1164,6 +1164,9 @@
 				hash;
 			hash = History.getHashByUrl(url);
 			return hash;
+		};
+
+		/**
 		 * History.unescapeHash()
 		 * normalize and Unescape a Hash
 		 * @param {String} hash

@@ -1031,6 +1031,11 @@ if (typeof JSON !== 'object') {
 			History.onHashChange = function(event){
 				//History.debug('History.onHashChange', arguments);
 
+				if (History.initialHashChange) {
+					History.savedStates = [];
+					History.initialHashChange = false;
+				}
+
 				// Prepare
 				var currentUrl = ((event && event.newURL) || History.getLocationHref()),
 					currentHash = History.getHashByUrl(currentUrl),
@@ -1275,6 +1280,7 @@ if (typeof JSON !== 'object') {
 			 */
 			if ( History.getHash() && !History.emulated.hashChange ) {
 				History.Adapter.onDomLoad(function(){
+					History.initialHashChange = true;
 					History.Adapter.trigger(window,'hashchange');
 				});
 			}
@@ -1332,7 +1338,8 @@ if (typeof JSON !== 'object') {
 
 	// Check Existence
 	if ( typeof History.init !== 'undefined' ) {
-		throw new Error('History.js Core has already been loaded...');
+		console.log('History.js Core has already been loaded...');
+		return;
 	}
 
 	// Initialize History
@@ -1428,6 +1435,12 @@ if (typeof JSON !== 'object') {
 		 * What is the title of the initial state
 		 */
 		History.options.initialTitle = History.options.initialTitle || document.title;
+		
+		/**
+		 * History.options.transformHash
+		 * If true will transform the HTML4 hash to HTML5 equivalence. Set to false if you want the hash to be just a plain string, no meaning whatsoever.
+		 */
+		History.options.transformHash = History.options.transformHash || true;
 
 		/**
 		 * History.options.html4Mode
@@ -1440,7 +1453,6 @@ if (typeof JSON !== 'object') {
 		 * Want to override default options and call init manually.
 		 */
 		History.options.delayInit = History.options.delayInit || false;
-
 
 		// ====================================================================
 		// Interval record
@@ -1893,7 +1905,7 @@ if (typeof JSON !== 'object') {
 
 			if (doc.URL.indexOf('#') == -1 && doc.location.href.indexOf('#') != -1)
 				return doc.location.href;
-			
+
 			return doc.URL || doc.location.href;
 		};
 
@@ -2204,7 +2216,7 @@ if (typeof JSON !== 'object') {
 			var id,parts,url, tmp;
 
 			// Extract
-			
+
 			// If the URL has a #, use the id from before the #
 			if (url_or_hash.indexOf('#') != -1)
 			{
@@ -2214,7 +2226,7 @@ if (typeof JSON !== 'object') {
 			{
 				tmp = url_or_hash;
 			}
-			
+
 			parts = /(.*)\&_suid=([0-9]+)$/.exec(tmp);
 			url = parts ? (parts[1]||url_or_hash) : url_or_hash;
 			id = parts ? String(parts[2]||'') : '';
@@ -2243,7 +2255,7 @@ if (typeof JSON !== 'object') {
 		 * @param {String} url_or_hash
 		 * @return {State|null}
 		 */
-		History.extractState = function(url_or_hash,create){
+		History.extractState = function(url_or_hash,create,title){
 			// Prepare
 			var State = null, id, url;
 			create = create||false;
@@ -2267,7 +2279,7 @@ if (typeof JSON !== 'object') {
 
 				// Create State
 				if ( !State && create && !History.isTraditionalAnchor(url_or_hash) ) {
-					State = History.createStateObject(null,null,url);
+					State = History.createStateObject(null,title||null,url);
 				}
 			}
 
@@ -2414,7 +2426,7 @@ if (typeof JSON !== 'object') {
 			// Return State
 			return State;
 		};
-		
+
 		/**
 		 * History.getCurrentIndex()
 		 * Gets the current index
@@ -2423,7 +2435,7 @@ if (typeof JSON !== 'object') {
 		History.getCurrentIndex = function(){
 			// Prepare
 			var index = null;
-			
+
 			// No states saved
 			if(History.savedStates.length < 1) {
 				index = 0;
@@ -2462,7 +2474,7 @@ if (typeof JSON !== 'object') {
 			var result = History.normalizeHash(hash);
 
 			// Unescape hash
-			result = decodeURIComponent(result);
+			result = window.decodeURIComponent(result);
 
 			// Return result
 			return result;
@@ -2999,7 +3011,7 @@ if (typeof JSON !== 'object') {
 				if ( currentHash ) {
 					// Expand Hash
 					currentState = History.extractState(currentHash||History.getLocationHref(),true);
-					if ( currentState ) {
+					if ( History.options.transformHash && currentState ) {
 						// We were able to parse it, it must be a State!
 						// Let's forward to replaceState
 						//History.debug('History.onPopState: state anchor', currentHash, currentState);
@@ -3081,7 +3093,7 @@ if (typeof JSON !== 'object') {
 
 				// Check the State
 				if ( History.getHashByUrl(url) && History.emulated.pushState ) {
-					throw new Error('History.js does not support states with fragement-identifiers (hashes/anchors).');
+					throw new Error('History.js does not support states with fragment-identifiers (hashes/anchors).');
 				}
 
 				// Handle Queueing
@@ -3138,7 +3150,7 @@ if (typeof JSON !== 'object') {
 
 				// Check the State
 				if ( History.getHashByUrl(url) && History.emulated.pushState ) {
-					throw new Error('History.js does not support states with fragement-identifiers (hashes/anchors).');
+					throw new Error('History.js does not support states with fragment-identifiers (hashes/anchors).');
 				}
 
 				// Handle Queueing
@@ -3216,7 +3228,7 @@ if (typeof JSON !== 'object') {
 		/**
 		 * Create the initial State
 		 */
-		History.saveState(History.storeState(History.extractState(History.getLocationHref(),true)));
+		History.saveState(History.storeState(History.extractState(History.getLocationHref(),true,document.title)));
 
 		/**
 		 * Bind for Saving Store
@@ -3285,7 +3297,7 @@ if (typeof JSON !== 'object') {
 					// Store
 					sessionStorage.setItem('History.store', currentStoreString);
 				} catch (e) {
-					if (e.code === DOMException.QUOTA_EXCEEDED_ERR) {
+					if (typeof DOMException !== 'undefined' && e.code === DOMException.QUOTA_EXCEEDED_ERR) {
 						if (sessionStorage.length) {
 							// Workaround for a bug seen on iPads. Sometimes the quota exceeded error comes up and simply
 							// removing/resetting the storage can work.

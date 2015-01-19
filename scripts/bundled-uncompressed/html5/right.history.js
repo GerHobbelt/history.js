@@ -87,9 +87,9 @@
 	"use strict";
 
 	// ========================================================================
-	// Initialise
+	// Initialize
 
-	// Localise Globals
+	// Localize Globals
 	var
 		console = window.console||undefined, // Prevent a JSLint complain
 		document = window.document, // Make sure we are using the correct document
@@ -122,7 +122,7 @@
 		throw new Error('History.js Core has already been loaded...');
 	}
 
-	// Initialise History
+	// Initialize History
 	History.init = function(options){
 		// Check Load Status of Adapter
 		if ( typeof History.Adapter === 'undefined' ) {
@@ -145,11 +145,11 @@
 
 
 	// ========================================================================
-	// Initialise Core
+	// Initialize Core
 
-	// Initialise Core
+	// Initialize Core
 	History.initCore = function(options){
-		// Initialise
+		// Initialize
 		if ( typeof History.initCore.initialized !== 'undefined' ) {
 			// Already Loaded
 			return false;
@@ -188,7 +188,7 @@
 
 		/**
 		 * History.options.disableSuid
-		 * Force History not to append suid
+		 * Force History not to append SUID
 		 */
 		History.options.disableSuid = History.options.disableSuid || false;
 
@@ -273,20 +273,20 @@
 		History.log = function(){
 			// Prepare
 			var
-                debugExists = !(typeof debug === 'undefined' || typeof debug.log === 'undefined' || typeof debug.log.apply === 'undefined'),
+				debugExists = !(typeof debug === 'undefined' || typeof debug.log === 'undefined' || typeof debug.log.apply === 'undefined'),
 				consoleExists = !(typeof console === 'undefined' || typeof console.log === 'undefined' || typeof console.log.apply === 'undefined'),
 				textarea = document.getElementById('log'),
 				message,
 				i,n,
 				args,arg
 				;
-            
-            args = Array.prototype.slice.call(arguments);
+			
+			args = Array.prototype.slice.call(arguments);
 			message = args.shift();
 
-	        //Write to Debug( https://github.com/cowboy/javascript-debug) if available
-	        if (debugExists ) {
-			    debug.debug(message,args);
+			//Write to Debug( https://github.com/cowboy/javascript-debug) if available
+			if ( debugExists ) {
+				debug.debug(message,args);
 			}
 
 			// Write to Console
@@ -336,7 +336,7 @@
 
 		/**
 		 * History.getInternetExplorerMajorVersion()
-		 * Get's the major version of Internet Explorer
+		 * Gets the major version of Internet Explorer
 		 * @return {integer}
 		 * @license Public Domain
 		 * @author Benjamin Arthur Lupton <contact@balupton.com>
@@ -345,8 +345,8 @@
 		History.getInternetExplorerMajorVersion = function(){
 			var result = History.getInternetExplorerMajorVersion.cached =
 					(typeof History.getInternetExplorerMajorVersion.cached !== 'undefined')
-				?	History.getInternetExplorerMajorVersion.cached
-				:	(function(){
+				?   History.getInternetExplorerMajorVersion.cached
+				:   (function(){
 						var v = 3,
 								div = document.createElement('div'),
 								all = div.getElementsByTagName('i');
@@ -368,8 +368,8 @@
 			var result =
 				History.isInternetExplorer.cached =
 				(typeof History.isInternetExplorer.cached !== 'undefined')
-					?	History.isInternetExplorer.cached
-					:	Boolean(History.getInternetExplorerMajorVersion())
+					?   History.isInternetExplorer.cached
+					:   Boolean(History.getInternetExplorerMajorVersion())
 						&&!Boolean(navigator.userAgent.match(/(chromeframe)[\s\/]([\d.]+)/))
 				;
 			return result;
@@ -661,7 +661,7 @@
 		 * @param {object} document
 		 * @return {string} url
 		 */
-		History.getLocationHref = function(doc) {
+		History.getLocationHref = function(doc){
 			doc = doc || document;
 
 			// most of the time, this will be true
@@ -726,7 +726,7 @@
 
 		/**
 		 * History.noramlizeStore()
-		 * Noramlize the store by adding necessary values
+		 * Normalize the store by adding necessary values
 		 */
 		History.normalizeStore = function(){
 			History.store.idToState = History.store.idToState||{};
@@ -986,7 +986,7 @@
 		 * @param {string} url_or_hash
 		 * @return {string} id
 		 */
-		History.extractId = function ( url_or_hash ) {
+		History.extractId = function (url_or_hash){
 			// Prepare
 			var id,parts,url, tmp;
 
@@ -1098,7 +1098,7 @@
 		 * @param {Object} newState
 		 * @return {Boolean} hasDuplicate
 		 */
-		History.hasUrlDuplicate = function(newState) {
+		History.hasUrlDuplicate = function(newState){
 			// Prepare
 			var hasDuplicate = false,
 				oldState;
@@ -1206,7 +1206,7 @@
 		 * History.getCurrentIndex()
 		 * Gets the current index
 		 * @return (integer)
-		*/
+		 */
 		History.getCurrentIndex = function(){
 			// Prepare
 			var index = null;
@@ -1972,7 +1972,7 @@
 
 
 		// ====================================================================
-		// Initialise
+		// Initialize
 
 		/**
 		 * Load the Store
@@ -2012,7 +2012,7 @@
 			// When the page is closed
 			History.onUnload = function(){
 				// Prepare
-				var	currentStore, item, currentStoreString;
+				var currentStore, item, currentStoreString;
 
 				// Fetch
 				try {
@@ -2046,17 +2046,17 @@
 					}
 					currentStore.stateToId[item] = History.stateToId[item];
 				}
-                
-                // if you don't want to 'leak' history memory when leaving the page then run this code instead:
-                if (0) {
-    				// Update
+				
+				// if you don't want to 'leak' history memory when leaving the page then run this code instead:
+				if (0) {
+					// Update
 					currentStore = {
-                        idToState: {},
-                        urlToId: {},
-                        stateToId: {}
-                    };
-                }
-                
+						idToState: {},
+						urlToId: {},
+						stateToId: {}
+					};
+				}
+				
 				// Update
 				History.store = currentStore;
 				History.normalizeStore();
@@ -2088,12 +2088,12 @@
 			};
 
 			if (typeof(window.onbeforeunload) !== 'undefined' || typeof(window.onunload) !== 'undefined') {
-    			// For Other Browsers
-			    History.Adapter.bind(window,'beforeunload', History.onUnload);
-  			    History.Adapter.bind(window,'unload', History.onUnload);
+				// For Other Browsers
+				History.Adapter.bind(window,'beforeunload', History.onUnload);
+				History.Adapter.bind(window,'unload', History.onUnload);
 			} else {
-			    // For Internet Explorer
-			    History.intervalList.push(setInterval(History.onUnload, History.options.storeInterval));
+				// For Internet Explorer
+				History.intervalList.push(setInterval(History.onUnload, History.options.storeInterval));
 			}
 		}
 
@@ -2123,7 +2123,7 @@
 					History.Adapter.trigger(window,'popstate');
 				});
 
-				// Initialise Alias
+				// Initialize Alias
 				if ( History.getHash() ) {
 					History.Adapter.onDomLoad(function(){
 						History.Adapter.trigger(window,'hashchange');
@@ -2136,7 +2136,7 @@
 
 	}; // History.initCore
 
-	// Try to Initialise History
+	// Try to Initialize History
 	if (!History.options || !History.options.delayInit) {
 		History.init();
 	}

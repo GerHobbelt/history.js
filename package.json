@@ -6,6 +6,8 @@
   "homepage": "https://github.com/browserstate/history.js",
   "keywords": [
     "javascript",
+    "history",
+    "history api",
     "html5 history api",
     "hashchange",
     "popstate",

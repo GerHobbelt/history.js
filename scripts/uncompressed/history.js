@@ -31,6 +31,7 @@
 		sessionStorage.setItem('TEST', '1');
 		sessionStorage.removeItem('TEST');
 	} catch(e) {
+		// e.g.: cookie disabled mobile safari, iOS 7 users get here
 		sessionStorage = false;
 	}
 
